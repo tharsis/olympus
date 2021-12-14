@@ -39,6 +39,6 @@ add_routes(app)
 
 if __name__ == '__main__':
     if ENV == 'DEV':
-        uvicorn.run(app, port=7000)
+        uvicorn.run(app, host='0.0.0.0', port=8899)
     else:
         uvicorn.run(app, root_path='/api', uds='/tmp/socket.sock')
