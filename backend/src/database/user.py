@@ -1,4 +1,3 @@
-from unicodedata import numeric
 from sqlalchemy.orm import Session
 from src.models.completed import CompletedDb
 from src.models.users import UserDb
