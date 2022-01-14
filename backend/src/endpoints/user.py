@@ -6,7 +6,9 @@ from fastapi import Depends
 from pydantic.main import BaseModel
 from sqlalchemy.orm import Session
 from src.database import session_for_request
-from src.database.user import get_user_missions_by_wallet, get_leaderboard, get_user_by_id
+from src.database.user import get_user_missions_by_wallet
+from src.database.user import get_leaderboard
+from src.database.user import get_user_by_id
 from src.endpoints.constants import USER_TAG
 from src.models.users import UserSchema
 
