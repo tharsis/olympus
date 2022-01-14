@@ -6,9 +6,9 @@ from fastapi import Depends
 from pydantic.main import BaseModel
 from sqlalchemy.orm import Session
 from src.database import session_for_request
-from src.database.user import get_user_missions_by_wallet
 from src.database.user import get_leaderboard
 from src.database.user import get_user_by_id
+from src.database.user import get_user_missions_by_wallet
 from src.endpoints.constants import USER_TAG
 from src.models.users import UserSchema
 
@@ -44,13 +44,16 @@ async def get_user_missions(user_wallet: str, db: Session = Depends(session_for_
         missions = []
     return {'missions': missions}
 
+
 class LeaderboardRanking(BaseModel):
     wallet: str
     total_points: int
 
+
 class LeaderBoardRankings(BaseModel):
     leaderboard: List[LeaderboardRanking]
 
+
 @router.get('/leaderboard', tags=[USER_TAG], response_model=LeaderBoardRankings)
 async def get_leaderboard_rankings(page: int, per_page: int, db: Session = Depends(session_for_request)):
-  return { "leaderboard": get_leaderboard(db, page, per_page) }
+    return {'leaderboard': get_leaderboard(db, page, per_page)}
