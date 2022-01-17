@@ -19,3 +19,11 @@ def get_user_missions_by_wallet(db: Session, wallet: str):
             res.append(m.id_task)
         return True, res
     return False, res
+
+
+def get_leaderboard(db: Session, page: int = 1, per_page: int = 20):
+    res = []
+    leaderboard = db.query(UserDb).order_by(UserDb.total_points.desc()).limit(per_page).offset((page - 1) * per_page)
+    for standing in leaderboard:
+        res.append({'wallet': standing.wallet, 'total_points': standing.total_points})
+    return res
