@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from src.models.completed import CompletedDb
 from src.models.users import UserDb
+from sqlalchemy import func
 
 
 def get_user_by_id(db: Session, id: int):
@@ -27,3 +28,17 @@ def get_leaderboard(db: Session, page: int = 1, per_page: int = 20):
     for standing in leaderboard:
         res.append({'wallet': standing.wallet, 'total_points': standing.total_points})
     return res
+
+def get_mission_stats(db: Session, wallet: str):
+  row_number_column = func.row_number().over(order_by=UserDb.total_points.desc())
+  rank_row = db.query(UserDb).add_column(row_number_column).from_self().filter(UserDb.wallet == wallet).first()
+  rank = rank_row[1] if rank_row else -1
+  participants = db.query(UserDb).count()
+  completedMissions = db.query(CompletedDb).count()
+  highestPoints = db.query(UserDb).order_by(UserDb.total_points.desc()).first().total_points
+  return {
+    "rank": rank,
+    "participants": participants,
+    "completedMissions": completedMissions,
+    "highestPoints": highestPoints
+  }
