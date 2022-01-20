@@ -15,6 +15,7 @@ ALLOWED_HOSTS = ['*']
 
 # debug code only
 def register_exception(app: FastAPI):
+
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request: Request, exc: RequestValidationError):
         exc_str = f'{exc}'.replace('\n', ' ').replace('   ', ' ')
