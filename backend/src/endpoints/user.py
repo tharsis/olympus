@@ -61,7 +61,7 @@ async def get_leaderboard_rankings(page: int, per_page: int, db: Session = Depen
 
 
 @router.get('/mission_stats/{user_wallet}', tags=[USER_TAG])
-async def get_user_missions(user_wallet: str, db: Session = Depends(session_for_request)):
+async def get_mission_stats_handler(user_wallet: str, db: Session = Depends(session_for_request)):
     try:
         stats = get_mission_stats(db, user_wallet)
         return {'stats': stats}

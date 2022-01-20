@@ -31,6 +31,7 @@ def get_leaderboard(db: Session, page: int = 1, per_page: int = 20):
 
 
 def get_mission_stats(db: Session, wallet: str):
+    # TODO: calculate the stats just one time and store them on the database
     row_number_column = func.row_number().over(order_by=UserDb.total_points.desc())
     rank_row = db.query(UserDb).add_column(row_number_column).from_self().filter(UserDb.wallet == wallet).first()
     rank = rank_row[1] if rank_row else -1
