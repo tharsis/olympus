@@ -1,7 +1,9 @@
 import base64
 from typing import Any
 from typing import List
+from typing import Optional
 
+import requests
 from evmosgrpc.accounts import get_account_all_balances
 from evmosgrpc.broadcaster import broadcast
 from evmosgrpc.builder import ExternalWallet
@@ -14,9 +16,11 @@ from evmosgrpc.transaction import Transaction
 from evmoswallet.eth.ethereum import sha3_256
 from fastapi import APIRouter
 from fastapi import Depends
+from fastapi import HTTPException
 from google.protobuf.json_format import MessageToDict
 from pydantic.main import BaseModel
 from sqlalchemy.orm import Session
+from src.constants import REST_ENDPOINT
 from src.database import session_for_request
 from src.endpoints.constants import BLOCKCHAIN_TAG
 
@@ -75,6 +79,26 @@ class BroadcastData(BaseModel):
     signature: str
 
 
+class ClaimsRequest(BaseModel):
+    address: str
+
+
+class Claim(BaseModel):
+    action: str
+    completed: bool
+    claimable_amount: str
+
+
+class ClaimsData(BaseModel):
+    initial_claimable_amount: str
+    claims: List[Claim]
+
+
+class ClaimsResponse(BaseModel):
+    data: Optional[ClaimsData]
+    error: Optional[str]
+
+
 def generate_message(tx: Transaction,
                      builder: ExternalWallet,
                      msg: Any,
@@ -127,3 +151,25 @@ def signed_msg(data: BroadcastData):
     if 'code' in dictResponse['txResponse'].keys():
         return {'res': False, 'msg': dictResponse['txResponse']['rawLog']}
     return {'res': True, 'msg': dictResponse['txResponse']['txhash']}
+
+
+@router.post('/claims')
+def claims(data: ClaimsRequest):
+    r = requests.get(f'{REST_ENDPOINT}evmos/claims/v1/claims_records/{data.address}')
+    if r.status_code == 200:
+        resp = r.json()
+        return ClaimsResponse(data=resp)
+    elif r.status_code == 404:
+        # Wallet not in the claims database
+        actions = []
+        for action in ['ACTION_VOTE', 'ACTION_DELEGATE', 'ACTION_EVM', 'ACTION_IBC_TRANSFER']:
+            actions.append(Claim(action=action, completed=False, claimable_amount='0'))
+        return (ClaimsData(initial_claimable_amount='0', claims=actions))
+
+    elif r.status_code == 400:
+        return ClaimsResponse(error='invalid wallet')
+
+    raise HTTPException(
+        status_code=r.status_code,
+        detail=r.reason,
+    )
