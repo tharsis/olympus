@@ -20,7 +20,7 @@ h11==0.12.0
 idna==3.3
 importlib-metadata==4.8.2
 importlib-resources==5.4.0
-Mako==1.1.6
+Mako==1.2.2
 MarkupSafe==2.0.1
 mnemonic==0.20
 pg8000==1.23.0
